@@ -11,10 +11,10 @@ func (handler *ValueHandler) NewValue(JSONValue *models.JSONValueIn) (*domain.Va
 	return handler.ValueService.NewValue(JSONValue.Value, JSONValue.Source, JSONValue.Type, JSONValue.Label)
 }
 
-func (handler *ValueHandler) NewValues(JSONValues *models.JSONValuesIn) ([]domain.Value, error) {
+func (handler *ValueHandler) NewValues(JSONValues []models.JSONValueIn) ([]domain.Value, error) {
 	var values []domain.Value
 
-	for _, JSONValue := range *JSONValues {
+	for _, JSONValue := range JSONValues {
 		value, err := handler.NewValue(&JSONValue)
 		if err != nil {
 			return nil, err

@@ -66,13 +66,13 @@ func (handler *ValueHandler) DeleteValue(w http.ResponseWriter, req *http.Reques
 
 // Try to create and persist several new Values
 func (handler *ValueHandler) CreateValues(w http.ResponseWriter, req *http.Request) error {
-	var JSONValuesIn models.JSONValuesIn
+	var JSONValuesIn []models.JSONValueIn
 
 	if err := handler.decodeJSON(req, &JSONValuesIn); err != nil {
 		return err
 	}
 
-	values, err := handler.NewValues(&JSONValuesIn)
+	values, err := handler.NewValues(JSONValuesIn)
 	if err != nil {
 		return err
 	}

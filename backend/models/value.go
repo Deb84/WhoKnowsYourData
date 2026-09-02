@@ -15,22 +15,14 @@ type JSONValueOut struct {
 	Label  string `json:"label"`
 }
 
-type JSONValuesIn []JSONValueIn
-
-type JSONValuesOut []JSONValueOut
-
 type JSONRelation struct {
 	Relation string   `json:"relation"`
 	From     []string `json:"from"`
 	To       []string `json:"to"`
 }
 
-type JSONRelations []JSONRelation
-
 type NEO4JRelation struct {
 	Relation string
 	From     []string
 	To       []string
 }
-
-type NEO4JRelations []NEO4JRelation
