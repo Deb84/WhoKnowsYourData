@@ -44,6 +44,10 @@ func (vr *ValueRepository) GetValuesFromLabel(ctx context.Context, label string)
 		return nil, err
 	}
 
+	if len(result.Records) == 0 {
+		return nil, nil
+	}
+
 	values := []domain.Value{}
 
 	for _, record := range result.Records {
@@ -71,6 +75,7 @@ func (vr *ValueRepository) GetValue(ctx context.Context, _uuid uuid.UUID) (*doma
 		return nil, nil
 
 	} else if len(result.Records) > 1 {
+		// I don't know if having a public error here is a problem. Maybe ?
 		return nil, valuesrepo.DatabaseIntegrityError(fmt.Errorf("value appearing twice in the database, uuid: %q", _uuid.String()))
 	}
 

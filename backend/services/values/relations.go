@@ -2,6 +2,7 @@ package valueservice
 
 import (
 	"context"
+	"fmt"
 	"whoknowsyourdata/domain"
 
 	"github.com/google/uuid"
@@ -11,14 +12,14 @@ func (vs *ValueService) NewRelation(ctx context.Context, relationType string, fr
 	var fromValues []domain.Value
 
 	for _, fromUUID := range from {
-		_uuid, err := uuid.Parse(fromUUID)
+		valueUUID, err := uuid.Parse(fromUUID)
 		if err != nil {
-			return nil, err
+			return nil, UnallowedRelation(fmt.Errorf("unable to parse %q to an UUID: %w", valueUUID, err))
 		}
 
-		value, err := vs.GetValue(ctx, _uuid)
+		value, err := vs.GetValue(ctx, valueUUID)
 		if err != nil {
-			return nil, err
+			return nil, UnallowedRelation(fmt.Errorf("unable to get value %q: %w", valueUUID, err))
 		}
 
 		fromValues = append(fromValues, *value)
@@ -27,14 +28,14 @@ func (vs *ValueService) NewRelation(ctx context.Context, relationType string, fr
 	var toValues []domain.Value
 
 	for _, toUUID := range to {
-		_uuid, err := uuid.Parse(toUUID)
+		valueUUID, err := uuid.Parse(toUUID)
 		if err != nil {
-			return nil, err
+			return nil, UnallowedRelation(fmt.Errorf("unable to parse %q to an UUID: %w", valueUUID, err))
 		}
 
-		value, err := vs.GetValue(ctx, _uuid)
+		value, err := vs.GetValue(ctx, valueUUID)
 		if err != nil {
-			return nil, err
+			return nil, UnallowedRelation(fmt.Errorf("unable to get value %q: %w", valueUUID, err))
 		}
 
 		toValues = append(toValues, *value)
@@ -42,7 +43,7 @@ func (vs *ValueService) NewRelation(ctx context.Context, relationType string, fr
 
 	relation, err := domain.NewRelation(relationType, fromValues, toValues)
 	if err != nil {
-		return nil, err
+		return nil, UnallowedRelation(fmt.Errorf("unable to create the relation: %w", err))
 	}
 
 	return relation, nil
@@ -52,7 +53,7 @@ func (vs *ValueService) CreateRelation(ctx context.Context, relation *domain.Rel
 	expectedRelations := len(relation.From) * len(relation.To)
 
 	if err := vs.repository.CreateRelation(ctx, relation, expectedRelations); err != nil {
-		return err
+		return UnableToCreateRelations(fmt.Errorf("unable to create a relation: %w", err))
 	}
 
 	return nil
@@ -67,7 +68,7 @@ func (vs *ValueService) CreateRelations(ctx context.Context, relations []domain.
 
 	err := vs.repository.CreateRelations(ctx, relations, expectedRelations)
 	if err != nil {
-		return err
+		return UnableToCreateRelations(fmt.Errorf("unable to create some relations: %w", err))
 	}
 
 	return nil
