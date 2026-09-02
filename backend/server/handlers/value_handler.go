@@ -6,7 +6,7 @@ import (
 	apperr "whoknowsyourdata/errors"
 	"whoknowsyourdata/models"
 	"whoknowsyourdata/server"
-	valueService "whoknowsyourdata/services/value"
+	valueService "whoknowsyourdata/services/values"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

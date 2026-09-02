@@ -5,20 +5,21 @@ import (
 	"context"
 	"fmt"
 	"whoknowsyourdata/domain"
-	neo4jrepo "whoknowsyourdata/repository/neo4j"
+	neo4jrepo "whoknowsyourdata/repository/values/neo4j"
 
 	"github.com/google/uuid"
 )
 
 type ValueService struct {
-	Log        domain.Logger
-	Repository *neo4jrepo.ValueRepository
+	log        domain.Logger
+	repository *neo4jrepo.ValueRepository
 }
 
-func NewValueService(repository *neo4jrepo.ValueRepository) *ValueService {
+func NewValueService(log domain.Logger, repository *neo4jrepo.ValueRepository) *ValueService {
 
 	return &ValueService{
-		Repository: repository,
+		log:        log,
+		repository: repository,
 	}
 }
 
@@ -72,7 +73,7 @@ func (vs *ValueService) NewRelation(ctx context.Context, relationType string, fr
 }
 
 func (vs *ValueService) PrepareDatabase(ctx context.Context) error {
-	err := vs.Repository.InitDB(ctx)
+	err := vs.repository.InitDB(ctx)
 	if err != nil {
 		return err
 	}
@@ -80,7 +81,7 @@ func (vs *ValueService) PrepareDatabase(ctx context.Context) error {
 }
 
 func (vs *ValueService) CreateValue(ctx context.Context, value *domain.Value) error {
-	err := vs.Repository.CreateValue(ctx, value)
+	err := vs.repository.CreateValue(ctx, value)
 	if err != nil {
 		return err
 	}
@@ -88,7 +89,7 @@ func (vs *ValueService) CreateValue(ctx context.Context, value *domain.Value) er
 }
 
 func (vs *ValueService) CreateValues(ctx context.Context, values []domain.Value) error {
-	err := vs.Repository.CreateValues(ctx, values)
+	err := vs.repository.CreateValues(ctx, values)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func (vs *ValueService) CreateValues(ctx context.Context, values []domain.Value)
 }
 
 func (vs *ValueService) GetValuesFromLabel(ctx context.Context, label string) ([]domain.Value, error) {
-	values, err := vs.Repository.GetValuesFromLabel(ctx, label)
+	values, err := vs.repository.GetValuesFromLabel(ctx, label)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +106,7 @@ func (vs *ValueService) GetValuesFromLabel(ctx context.Context, label string) ([
 }
 
 func (vs *ValueService) GetValue(ctx context.Context, _uuid uuid.UUID) (*domain.Value, error) {
-	value, err := vs.Repository.GetValue(ctx, _uuid)
+	value, err := vs.repository.GetValue(ctx, _uuid)
 	if err != nil {
 		return nil, err
 
@@ -123,7 +124,7 @@ func (vs *ValueService) DeleteValue(ctx context.Context, valueUUID uuid.UUID) er
 	}
 
 	// Delete the value
-	err = vs.Repository.DeleteValue(ctx, valueUUID)
+	err = vs.repository.DeleteValue(ctx, valueUUID)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (vs *ValueService) DeleteValue(ctx context.Context, valueUUID uuid.UUID) er
 func (vs *ValueService) CreateRelation(ctx context.Context, relation *domain.Relation) error {
 	expectedRelations := len(relation.From) * len(relation.To)
 
-	if err := vs.Repository.CreateRelation(ctx, relation, expectedRelations); err != nil {
+	if err := vs.repository.CreateRelation(ctx, relation, expectedRelations); err != nil {
 		return err
 	}
 
@@ -147,7 +148,7 @@ func (vs *ValueService) CreateRelations(ctx context.Context, relations []domain.
 		expectedRelations = expectedRelations + len(relation.From)*len(relation.To)
 	}
 
-	err := vs.Repository.CreateRelations(ctx, relations, expectedRelations)
+	err := vs.repository.CreateRelations(ctx, relations, expectedRelations)
 	if err != nil {
 		return err
 	}

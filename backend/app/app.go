@@ -6,10 +6,10 @@ import (
 	"whoknowsyourdata/domain"
 	"whoknowsyourdata/models"
 	"whoknowsyourdata/neo4j"
-	neo4jrepo "whoknowsyourdata/repository/neo4j"
+	neo4jrepo "whoknowsyourdata/repository/values/neo4j"
 	"whoknowsyourdata/server"
 	"whoknowsyourdata/server/handlers"
-	valueservice "whoknowsyourdata/services/value"
+	valueservice "whoknowsyourdata/services/values"
 )
 
 func ServerBootstrap(log domain.Logger, env models.Env) error {
@@ -25,7 +25,7 @@ func ServerBootstrap(log domain.Logger, env models.Env) error {
 	}
 
 	valueRepository := neo4jrepo.NewValueRepository(log, driver)
-	valueService := valueservice.NewValueService(valueRepository)
+	valueService := valueservice.NewValueService(log, valueRepository)
 
 	err = valueService.PrepareDatabase(context.Background())
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"whoknowsyourdata/domain"
+	valuesrepo "whoknowsyourdata/repository/values"
 
 	"github.com/google/uuid"
 )
@@ -70,7 +71,7 @@ func (vr *ValueRepository) GetValue(ctx context.Context, _uuid uuid.UUID) (*doma
 		return nil, nil
 
 	} else if len(result.Records) > 1 {
-		return nil, DatabaseIntegrityError(fmt.Errorf("value appearing twice in the database, uuid: %q", _uuid.String()))
+		return nil, valuesrepo.DatabaseIntegrityError(fmt.Errorf("value appearing twice in the database, uuid: %q", _uuid.String()))
 	}
 
 	value, err := GetValueFromRecord(result.Records[0])

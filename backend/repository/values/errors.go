@@ -1,4 +1,4 @@
-package neo4jrepo
+package valuesrepo
 
 import apperr "whoknowsyourdata/errors"
 
