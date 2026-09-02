@@ -1,0 +1,2 @@
+- [x] Write validation on value and relation
+- [] Write error in service

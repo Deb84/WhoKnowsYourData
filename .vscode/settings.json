@@ -1,0 +1,11 @@
+{
+    "go.lintTool": "golangci-lint-v2",
+    "go.lintOnSave": "package",
+    "cSpell.words": [
+        "apperr",
+        "joho",
+        "jrepo",
+        "valueservice",
+        "whoknowsyourdata"
+    ]
+}
