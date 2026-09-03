@@ -20,6 +20,8 @@ const (
 	NEO4J_PORT     = "NEO4J_PORT"
 	NEO4J_USER     = "NEO4J_USER"
 	NEO4J_PASSWORD = "NEO4J_PASSWORD"
+
+	WEBUI_PORT = "WEBUI_PORT"
 )
 
 // Possibles env values
@@ -44,22 +46,22 @@ var trustedByENV = map[string]bool{
 
 const envFile = "../.env"
 
-func EmptyFieldErr(field string) error {
+func emptyFieldErr(field string) error {
 	return fmt.Errorf("env: %q empty", field)
 }
 
 func ValidateNeo4jEnv(log domain.Logger, env models.Neo4jEnv) error {
 	if env.HOST == "" {
-		return EmptyFieldErr(NEO4J_HOST)
+		return emptyFieldErr(NEO4J_HOST)
 	}
 	if env.PORT == "" {
-		return EmptyFieldErr(NEO4J_PORT)
+		return emptyFieldErr(NEO4J_PORT)
 	}
 	if env.USER == "" {
-		return EmptyFieldErr(NEO4J_USER)
+		return emptyFieldErr(NEO4J_USER)
 	}
 	if env.PASSWORD == "" {
-		return EmptyFieldErr(NEO4J_PASSWORD)
+		return emptyFieldErr(NEO4J_PASSWORD)
 	}
 	return nil
 }
@@ -74,16 +76,23 @@ func ValidateAppEnv(log domain.Logger, env *models.AppEnv) error {
 	return nil
 }
 
-func ValidateEnv(log domain.Logger, env *models.Env) error {
+func ValidateWebEnv(env models.WebEnv) error {
+	if env.PORT == "" {
+		return emptyFieldErr(WEBUI_PORT)
+	}
+	return nil
+}
 
+func ValidateEnv(log domain.Logger, env *models.Env) error {
 	if err := ValidateNeo4jEnv(log, env.Neo4j); err != nil {
 		return err
 	}
-
 	if err := ValidateAppEnv(log, &env.App); err != nil {
 		return err
 	}
-
+	if err := ValidateWebEnv(env.Web); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -104,9 +113,14 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 		ENV: os.Getenv(ENV),
 	}
 
+	webEnv := models.WebEnv{
+		PORT: os.Getenv(WEBUI_PORT),
+	}
+
 	env := &models.Env{
 		Neo4j: neo4jEnv,
 		App:   appEnv,
+		Web:   webEnv,
 	}
 
 	if err := ValidateEnv(log, env); err != nil {

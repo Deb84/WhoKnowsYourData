@@ -12,7 +12,12 @@ type AppEnv struct {
 	TRUSTED_CTX bool
 }
 
+type WebEnv struct {
+	PORT string
+}
+
 type Env struct {
 	Neo4j Neo4jEnv
 	App   AppEnv
+	Web   WebEnv
 }

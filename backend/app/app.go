@@ -17,7 +17,7 @@ func ServerBootstrap(log domain.Logger, env models.Env) error {
 
 	router := server.NewRouter(log, errorHandler)
 	routes := server.NewRoutes()
-	srv := server.New(":8601", router)
+	srv := server.New(":"+env.Web.PORT, router)
 
 	driver, err := neo4j.NewSession(env.Neo4j)
 	if err != nil {
