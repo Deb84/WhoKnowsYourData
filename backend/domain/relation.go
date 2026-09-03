@@ -14,11 +14,11 @@ const (
 	RelationHasValue    RelationType = "HAS_VALUE"
 )
 
-var allowedRelationsMap = map[RelationType]RelationType{
-	RelationOwnsAccount: RelationOwnsAccount,
-	RelationOwnsCompany: RelationOwnsCompany,
-	RelationIsPartner:   RelationIsPartner,
-	RelationHasValue:    RelationHasValue,
+var allowedRelationsMap = map[RelationType]struct{}{
+	RelationOwnsAccount: {},
+	RelationOwnsCompany: {},
+	RelationIsPartner:   {},
+	RelationHasValue:    {},
 }
 
 var ErrInvalidRelation = errors.New("invalid relation type")
@@ -30,22 +30,9 @@ func NewRelationType(relationType string) (RelationType, error) {
 	return RelationType(relationType), nil
 }
 
-var allowedRelationsTo = map[RelationType]map[Label]struct{}{
-	RelationOwnsAccount: {
-		LabelAccount: {},
-	},
-	RelationOwnsCompany: {
-		LabelCompany: {},
-	},
-	RelationIsPartner: {
-		LabelCompany: {},
-	},
-	RelationHasValue: {
-		LabelValue: {},
-	},
-}
+type AllowedMap map[Label]map[RelationType]struct{}
 
-var allowedRelationsFrom = map[Label]map[RelationType]struct{}{ // Not implemented yet
+var allowedRelationsFrom = AllowedMap{
 	LabelAccount: {
 		RelationHasValue: {},
 	},
@@ -58,6 +45,19 @@ var allowedRelationsFrom = map[Label]map[RelationType]struct{}{ // Not implement
 	},
 }
 
+var allowedRelationsTo = AllowedMap{
+	LabelAccount: {
+		RelationOwnsAccount: {},
+	},
+	LabelCompany: {
+		RelationOwnsCompany: {},
+		RelationIsPartner:   {},
+	},
+	LabelValue: {
+		RelationHasValue: {},
+	},
+}
+
 type Relation struct {
 	Relation RelationType
 	From     []ValueID
@@ -66,28 +66,33 @@ type Relation struct {
 
 var ErrUnallowedRelation = errors.New("unallowed relation")
 
+func getValueIDs(relationType RelationType, values []Value, allowedMap AllowedMap, errString string) ([]ValueID, error) {
+	var valueIDs []ValueID
+
+	for _, value := range values {
+		if _, ok := allowedMap[value.Label][relationType]; !ok {
+			return nil, fmt.Errorf(errString, ErrUnallowedRelation, relationType, value.Label)
+		}
+		valueIDs = append(valueIDs, value.UUID)
+	}
+
+	return valueIDs, nil
+}
+
 func NewRelation(relationType string, from, to []Value) (*Relation, error) {
 	newRelationType, err := NewRelationType(relationType)
 	if err != nil {
 		return nil, err
 	}
 
-	var fromValueID []ValueID
-
-	for _, valueFrom := range from {
-		if _, ok := allowedRelationsFrom[valueFrom.Label][newRelationType]; !ok {
-			return nil, fmt.Errorf("%w: %q is not a valid relation from a %q node", ErrUnallowedRelation, newRelationType, valueFrom.Label)
-		}
-		fromValueID = append(fromValueID, valueFrom.UUID)
+	fromValueID, err := getValueIDs(newRelationType, from, allowedRelationsFrom, "%w: %q is not a valid relation from a %q node")
+	if err != nil {
+		return nil, err
 	}
 
-	var toValueID []ValueID
-
-	for _, valueTo := range to {
-		if _, ok := allowedRelationsTo[newRelationType][valueTo.Label]; !ok {
-			return nil, fmt.Errorf("%w: %q is not a valid relation to a %q node", ErrUnallowedRelation, newRelationType, valueTo.Label)
-		}
-		toValueID = append(toValueID, valueTo.UUID)
+	toValueID, err := getValueIDs(newRelationType, to, allowedRelationsTo, "%w: %q is not a valid relation to a %q node")
+	if err != nil {
+		return nil, err
 	}
 
 	return &Relation{
