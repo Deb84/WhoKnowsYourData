@@ -8,37 +8,35 @@ import (
 	"github.com/google/uuid"
 )
 
-func (vs *ValueService) NewRelation(ctx context.Context, relationType string, from, to []string) (*domain.Relation, error) {
-	var fromValues []domain.Value
+func (vs *ValueService) validateRelationValues(ctx context.Context, UUIDs []string) ([]domain.Value, error) {
+	var values []domain.Value
 
-	for _, fromUUID := range from {
-		valueUUID, err := uuid.Parse(fromUUID)
+	for _, valueUUID := range UUIDs {
+		parsedUUID, err := uuid.Parse(valueUUID)
 		if err != nil {
 			return nil, UnallowedRelation(fmt.Errorf("unable to parse %q to an UUID: %w", valueUUID, err))
 		}
 
-		value, err := vs.GetValue(ctx, valueUUID)
+		value, err := vs.GetValue(ctx, parsedUUID)
 		if err != nil {
 			return nil, UnallowedRelation(fmt.Errorf("unable to get value %q: %w", valueUUID, err))
 		}
 
-		fromValues = append(fromValues, *value)
+		values = append(values, *value)
 	}
 
-	var toValues []domain.Value
+	return values, nil
+}
 
-	for _, toUUID := range to {
-		valueUUID, err := uuid.Parse(toUUID)
-		if err != nil {
-			return nil, UnallowedRelation(fmt.Errorf("unable to parse %q to an UUID: %w", valueUUID, err))
-		}
+func (vs *ValueService) NewRelation(ctx context.Context, relationType string, from, to []string) (*domain.Relation, error) {
+	fromValues, err := vs.validateRelationValues(ctx, from)
+	if err != nil {
+		return nil, err
+	}
 
-		value, err := vs.GetValue(ctx, valueUUID)
-		if err != nil {
-			return nil, UnallowedRelation(fmt.Errorf("unable to get value %q: %w", valueUUID, err))
-		}
-
-		toValues = append(toValues, *value)
+	toValues, err := vs.validateRelationValues(ctx, to)
+	if err != nil {
+		return nil, err
 	}
 
 	relation, err := domain.NewRelation(relationType, fromValues, toValues)
