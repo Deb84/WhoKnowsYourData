@@ -2,6 +2,7 @@ package neo4jrepo
 
 import (
 	"fmt"
+	"slices"
 	"whoknowsyourdata/domain"
 	"whoknowsyourdata/models"
 
@@ -44,44 +45,54 @@ func GetValueFromRecord(record *neo4j.Record) (*domain.Value, error) {
 
 	props := node.Props
 
-	RUuid, ok1 := props[FUuid]
-	RValue, ok2 := props[FValue]
-	RType, ok3 := props[FType]
-	RSource, ok4 := props[FSource]
+	// r for record
+	rUUID, ok1 := props[FUuid]
+	rValue, ok2 := props[FValue]
+	rType, ok3 := props[FType]
+	rSource, ok4 := props[FSource]
 	if !ok1 || !ok2 || !ok3 || !ok4 {
-		return nil, fmt.Errorf("unable to get record props: A props doesn't exists UUID=%t, VALUE=%t, TYPE=%t, SOURCE=%t", ok1, ok2, ok3, ok4)
+		return nil, fmt.Errorf("unable to get record props: a props doesn't exists UUID=%t, VALUE=%t, TYPE=%t, SOURCE=%t", ok1, ok2, ok3, ok4)
 	}
 
-	// S for string
+	// s for string
 	// Cast string type to props
-	SUuid, ok1 := RUuid.(string)
-	SValue, ok2 := RValue.(string)
-	SType, ok3 := RType.(string)
-	SSource, ok4 := RSource.(string)
+	sUUID, ok1 := rUUID.(string)
+	sValue, ok2 := rValue.(string)
+	sType, ok3 := rType.(string)
+	sSource, ok4 := rSource.(string)
 	if !ok1 || !ok2 || !ok3 || !ok4 {
 		return nil, fmt.Errorf("unable to cast record props to string")
 	}
 
 	// Ensure uuid cannot be invalid
-	parsedUUID, err := uuid.Parse(SUuid)
+	parsedUUID, err := uuid.Parse(sUUID)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse uuid UUID=%s ERR=%w", SUuid, err)
+		return nil, fmt.Errorf("unable to parse uuid UUID=%s ERR=%w", sUUID, err)
 	}
 
 	// Ensure label cannot be invalid
-	// [1] is used to ignore "IndexLabel"
-	label, err := domain.NewLabel(node.Labels[1])
-	if err != nil {
-		return nil, err
+
+	// Check if there is label
+	if len(node.Labels) == 0 {
+		return nil, fmt.Errorf("node has no label")
 	}
 
-	value := &domain.Value{
-		UUID:   domain.ValueID{UUID: parsedUUID},
-		Value:  SValue,
-		Type:   SType,
-		Source: SSource,
-		Label:  label,
+	var labelStr string
+
+	// ignore technical labels
+	for _, label := range node.Labels {
+		if slices.Contains(domain.TechnicalLabels, domain.TechnicalLabel(label)) {
+			continue
+		}
+
+		labelStr = label
+		break
 	}
 
-	return value, nil
+	// in the case of there is only technical label, return an error
+	if labelStr == "" {
+		return nil, fmt.Errorf("node.label don't contains non-technical label")
+	}
+
+	return domain.NewValue(parsedUUID, sValue, sType, sSource, labelStr)
 }
