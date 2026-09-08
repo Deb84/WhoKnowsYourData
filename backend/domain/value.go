@@ -8,13 +8,16 @@ import (
 )
 
 const (
-	LabelAccount Label = "Account"
-	LabelCompany Label = "Company"
-	LabelValue   Label = "Value"
-	LabelPerson  Label = "Person"
+	LabelAccount Label          = "Account"
+	LabelCompany Label          = "Company"
+	LabelValue   Label          = "Value"
+	LabelPerson  Label          = "Person"
+	IndexLabel   TechnicalLabel = "IndexLabel"
 )
 
 type Label string
+
+type TechnicalLabel string
 
 var allowedLabelsMap = map[Label]Label{
 	LabelAccount: LabelAccount,
@@ -22,6 +25,8 @@ var allowedLabelsMap = map[Label]Label{
 	LabelValue:   LabelValue,
 	LabelPerson:  LabelPerson,
 }
+
+var TechnicalLabels = []TechnicalLabel{IndexLabel}
 
 var ErrInvalidLabel = errors.New("invalid label")
 

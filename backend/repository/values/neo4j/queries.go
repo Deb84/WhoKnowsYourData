@@ -17,7 +17,7 @@ type Query struct {
 type MatchQuery Query
 
 var genericParams = map[string]any{
-	FIndexLabel: IndexLabel,
+	FIndexLabel: domain.IndexLabel,
 }
 
 func NewQuery() *Query {
@@ -31,15 +31,10 @@ func NewInitDBQuery() *Query {
 		CREATE CONSTRAINT node_uuid_unique IF NOT EXISTS
 		FOR (n:%s)
 		REQUIRE n.uuid IS UNIQUE
-	`, IndexLabel)
-
-	params := map[string]any{
-		FIndexLabel: IndexLabel,
-	}
+	`, domain.IndexLabel)
 
 	return &Query{
-		Query:  &query,
-		Params: params,
+		Query: &query,
 	}
 }
 
@@ -61,8 +56,7 @@ func (q *Query) CreateValue(value *domain.Value) *Query {
 		CREATE (n:$($label):$($index_label) $props)
 	`
 	params := map[string]any{
-		FLabel:      value.Label,
-		FIndexLabel: IndexLabel,
+		FLabel: value.Label,
 		FProps: map[string]string{
 			FUuid:   value.UUID.String(),
 			FValue:  value.Value,

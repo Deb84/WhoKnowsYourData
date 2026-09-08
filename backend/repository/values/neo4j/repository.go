@@ -8,9 +8,6 @@ import (
 )
 
 const (
-	// Technical labels
-	IndexLabel = "IndexLabel"
-
 	// Values fields
 	FLabel  = "label"
 	FProps  = "props"
