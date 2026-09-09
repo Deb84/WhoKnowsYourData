@@ -50,7 +50,7 @@ func emptyFieldErr(field string) error {
 	return fmt.Errorf("env: %q empty", field)
 }
 
-func ValidateNeo4jEnv(log domain.Logger, env models.Neo4jEnv) error {
+func ValidateNeo4jEnv(env models.Neo4jEnv) error {
 	if env.HOST == "" {
 		return emptyFieldErr(NEO4J_HOST)
 	}
@@ -66,7 +66,7 @@ func ValidateNeo4jEnv(log domain.Logger, env models.Neo4jEnv) error {
 	return nil
 }
 
-func ValidateAppEnv(log domain.Logger, env *models.AppEnv) error {
+func ValidateAppEnv(env *models.AppEnv) error {
 	if !slices.Contains(envValues, env.ENV) {
 		return fmt.Errorf("env: ENV value is incorrect, correct_values=[%s]", strings.Join(envValues, `, `))
 	}
@@ -83,11 +83,11 @@ func ValidateWebEnv(env models.WebEnv) error {
 	return nil
 }
 
-func ValidateEnv(log domain.Logger, env *models.Env) error {
-	if err := ValidateNeo4jEnv(log, env.Neo4j); err != nil {
+func ValidateEnv(env *models.Env) error {
+	if err := ValidateNeo4jEnv(env.Neo4j); err != nil {
 		return err
 	}
-	if err := ValidateAppEnv(log, &env.App); err != nil {
+	if err := ValidateAppEnv(&env.App); err != nil {
 		return err
 	}
 	if err := ValidateWebEnv(env.Web); err != nil {
@@ -123,7 +123,7 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 		Web:   webEnv,
 	}
 
-	if err := ValidateEnv(log, env); err != nil {
+	if err := ValidateEnv(env); err != nil {
 		return nil, err
 	}
 
