@@ -72,11 +72,6 @@ func GetValueFromRecord(record *neo4j.Record) (*domain.Value, error) {
 
 	// Ensure label cannot be invalid
 
-	// Check if there is label
-	if len(node.Labels) == 0 {
-		return nil, fmt.Errorf("node has no label")
-	}
-
 	var labelStr string
 
 	// ignore technical labels
@@ -85,8 +80,11 @@ func GetValueFromRecord(record *neo4j.Record) (*domain.Value, error) {
 			continue
 		}
 
+		if labelStr != "" {
+			return nil, fmt.Errorf("node has multiple non-technical labels: %q and %q", labelStr, label)
+		}
+
 		labelStr = label
-		break
 	}
 
 	// in the case of there is only technical label, return an error
