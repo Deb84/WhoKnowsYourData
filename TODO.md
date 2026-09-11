@@ -1,5 +1,5 @@
 - [x] Write validation on value and relation
 - [x] Write error in service
 - [x] use an interface for the repository with the service
-- [] Write a better way to get a value record (avoid the technical label(s))
+- [x] Write a better way to get a value record (avoid the technical label(s))
 - [] get the value from neo4j after creating to ensure existence
