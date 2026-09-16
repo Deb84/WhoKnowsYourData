@@ -9,6 +9,11 @@ const (
 	KindInternal   Kind = "internal"
 )
 
+type PublicData struct {
+	Code    string
+	Message string
+}
+
 type PublicError struct {
 	Kind Kind
 	Code string
@@ -25,22 +30,22 @@ func (e *PublicError) Error() string {
 
 func (e *PublicError) Unwrap() error { return e.Err }
 
-func NewPublicError(kind Kind, code, msg string, err error) *PublicError {
-	return &PublicError{Kind: kind, Code: code, Msg: msg, Err: err}
+func NewPublicError(kind Kind, data PublicData, err error) *PublicError {
+	return &PublicError{Kind: kind, Code: data.Code, Msg: data.Message, Err: err}
 }
 
-func Validation(code, msg string, err error) *PublicError {
-	return NewPublicError(KindValidation, code, msg, err)
+func Validation(data PublicData, err error) *PublicError {
+	return NewPublicError(KindValidation, data, err)
 }
 
-func NotFound(code, msg string, err error) *PublicError {
-	return NewPublicError(KindNotFound, code, msg, err)
+func NotFound(data PublicData, err error) *PublicError {
+	return NewPublicError(KindNotFound, data, err)
 }
 
-func Conflict(code, msg string, err error) *PublicError {
-	return NewPublicError(KindConflict, code, msg, err)
+func Conflict(data PublicData, err error) *PublicError {
+	return NewPublicError(KindConflict, data, err)
 }
 
-func Internal(code, msg string, err error) *PublicError {
-	return NewPublicError(KindInternal, code, msg, err)
+func Internal(data PublicData, err error) *PublicError {
+	return NewPublicError(KindInternal, data, err)
 }

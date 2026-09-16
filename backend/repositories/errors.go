@@ -1,7 +1,11 @@
-package valuesrepo
+package repositories
 
 import apperr "whoknowsyourdata/errors"
 
+type PublicData = apperr.PublicData
+
+var ErrDataDatabaseIntegrityError PublicData = PublicData{Code: "integrity_error", Message: "data base integrity error"}
+
 func DatabaseIntegrityError(err error) *apperr.PublicError {
-	return apperr.Internal("integrity_error", "data base integrity error", err)
+	return apperr.Internal(ErrDataDatabaseIntegrityError, err)
 }
