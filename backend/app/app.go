@@ -6,7 +6,7 @@ import (
 	"whoknowsyourdata/domain"
 	"whoknowsyourdata/models"
 	"whoknowsyourdata/neo4j"
-	neo4jrepo "whoknowsyourdata/repository/values/neo4j"
+	neo4jrepo "whoknowsyourdata/repositories/values/neo4j"
 	"whoknowsyourdata/server"
 	"whoknowsyourdata/server/handlers"
 	valueservice "whoknowsyourdata/services/values"
