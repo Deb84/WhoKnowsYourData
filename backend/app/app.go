@@ -3,9 +3,9 @@ package app
 
 import (
 	"context"
+	"whoknowsyourdata/databases/neo4j"
 	"whoknowsyourdata/domain"
 	"whoknowsyourdata/models"
-	"whoknowsyourdata/neo4j"
 	neo4jrepo "whoknowsyourdata/repositories/values/neo4j"
 	"whoknowsyourdata/server"
 	"whoknowsyourdata/server/handlers"
