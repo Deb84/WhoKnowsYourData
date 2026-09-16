@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -15,7 +14,8 @@ import (
 
 // Env fields
 const (
-	ENV = "ENV"
+	ENV       = "ENV"
+	LOG_LEVEL = "LOG_LEVEL"
 
 	// Neo4j
 	NEO4J_HOST     = "NEO4J_HOST"
@@ -26,9 +26,19 @@ const (
 	// Sqlite
 	APP_DB = "APP_DB"
 
-	// App
+	// Webui
 	WEBUI_PORT = "WEBUI_PORT"
 )
+
+// Log level values
+const (
+	LevelDebug = "DEBUG"
+	LevelInfo  = "INFO"
+	LevelWarn  = "WARN"
+	LevelError = "ERROR"
+)
+
+var levelValues = []string{LevelDebug, LevelInfo, LevelWarn, LevelError}
 
 // Possibles env values
 const (
@@ -79,7 +89,12 @@ func ValidateSqliteEnv(env models.SqliteEnv) error {
 	return nil
 }
 
-func ValidateAppEnv(env *models.AppEnv) error {
+func ValidateAppEnv(log domain.Logger, env *models.AppEnv) error {
+	if !slices.Contains(levelValues, env.LOG_LEVEL) {
+		env.LOG_LEVEL = DefaultLogLevel
+		log.Info("env: LOG_LEVEL var is incorrect, %q level used", DefaultLogLevel)
+	}
+
 	if !slices.Contains(envValues, env.ENV) {
 		return fmt.Errorf("env: ENV value is incorrect, correct_values=[%s]", strings.Join(envValues, `, `))
 	}
@@ -96,11 +111,11 @@ func ValidateWebEnv(env models.WebEnv) error {
 	return nil
 }
 
-func ValidateEnv(env *models.Env) error {
+func ValidateEnv(log domain.Logger, env *models.Env) error {
 	if err := ValidateNeo4jEnv(env.Neo4j); err != nil {
 		return err
 	}
-	if err := ValidateAppEnv(&env.App); err != nil {
+	if err := ValidateAppEnv(log, &env.App); err != nil {
 		return err
 	}
 	if err := ValidateWebEnv(env.Web); err != nil {
@@ -112,7 +127,7 @@ func ValidateEnv(env *models.Env) error {
 func GetEnv(log domain.Logger) (*models.Env, error) {
 	err := godotenv.Load(envFile)
 	if err != nil {
-		slog.Info("Unable to load .env, assuming Docker is used")
+		log.Info("Unable to load .env, assuming Docker is used")
 	}
 
 	neo4jEnv := models.Neo4jEnv{
@@ -127,7 +142,8 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 	}
 
 	appEnv := models.AppEnv{
-		ENV: os.Getenv(ENV),
+		ENV:       os.Getenv(ENV),
+		LOG_LEVEL: strings.ToUpper(os.Getenv(LOG_LEVEL)),
 	}
 
 	webEnv := models.WebEnv{
@@ -141,7 +157,7 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 		Web:    webEnv,
 	}
 
-	if err := ValidateEnv(env); err != nil {
+	if err := ValidateEnv(log, env); err != nil {
 		return nil, err
 	}
 

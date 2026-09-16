@@ -14,6 +14,7 @@ type SqliteEnv struct {
 type AppEnv struct {
 	ENV         string
 	TRUSTED_CTX bool
+	LOG_LEVEL   string
 }
 
 type WebEnv struct {

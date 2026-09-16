@@ -5,44 +5,81 @@ import (
 	"time"
 )
 
+type Level int
+
 const (
-	LevelDebug   = -8
-	LevelVerbose = -4
-	LevelInfo    = 0
-	LevelWarn    = 4
-	LevelError   = 8
-	LevelFatal   = 12
+	LevelDebug Level = -4
+	LevelInfo  Level = 0
+	LevelWarn  Level = 4
+	LevelError Level = 8
+
+	LevelStringDebug = "DEBUG"
+	LevelStringInfo  = "INFO"
+	LevelStringWarn  = "WARN"
+	LevelStringError = "ERROR"
 )
 
 type Args []any
 
-type Logger struct{}
+type Config struct {
+	Level Level
+}
 
-func LevelString(level int) string {
+type Logger struct {
+	config Config
+}
+
+func LevelString(level Level) string {
 	switch level {
 	case LevelDebug:
-		return "DEBUG"
-	case LevelVerbose:
-		return "VERBOSE"
+		return LevelStringDebug
 	case LevelInfo:
-		return "INFO"
+		return LevelStringInfo
 	case LevelWarn:
-		return "WARN"
+		return LevelStringWarn
 	case LevelError:
-		return "ERROR"
-	case LevelFatal:
-		return "FATAL"
+		return LevelStringError
 	default:
 		return ""
 	}
 }
 
-func NewLogger() *Logger {
-
-	return &Logger{}
+func LevelInt(level string) (Level, bool) {
+	switch level {
+	case LevelStringDebug:
+		return LevelDebug, true
+	case LevelStringInfo:
+		return LevelInfo, true
+	case LevelStringWarn:
+		return LevelWarn, true
+	case LevelStringError:
+		return LevelError, true
+	default:
+		return 0, false
+	}
 }
 
-func (log *Logger) format(str string, level int, args Args) string {
+func NewLogger(config *Config) *Logger {
+	if config == nil {
+		config = &Config{
+			Level: LevelInfo,
+		}
+	}
+	return &Logger{
+		config: *config,
+	}
+}
+
+func (logger *Logger) SetLevel(levelString string) error {
+	level, ok := LevelInt(levelString)
+	if !ok {
+		return fmt.Errorf("incorrect level %q", levelString)
+	}
+	logger.config.Level = level
+	return nil
+}
+
+func (log *Logger) format(str string, level Level, args Args) string {
 	str = fmt.Sprintf(str, args...)
 
 	now := time.Now().Format("2006-01-02 15:04:05.000")
@@ -50,9 +87,14 @@ func (log *Logger) format(str string, level int, args Args) string {
 	return fmt.Sprintf("[%s] [%s] %s", now, levelString, str)
 }
 
-func (log *Logger) print(str string, level int, args Args) {
-	formatted := log.format(str, level, args)
-	fmt.Println(formatted)
+func (logger *Logger) print(str string, level Level, args []any) {
+	if level < logger.config.Level {
+		return
+	}
+
+	parsed := logger.format(str, level, args)
+
+	fmt.Println(parsed)
 }
 
 func (log *Logger) Info(str string, args ...any) {

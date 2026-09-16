@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"whoknowsyourdata/logger"
 	"whoknowsyourdata/models"
 )
 
@@ -76,13 +77,14 @@ func TestValidateNeo4jEnv(t *testing.T) {
 }
 
 func TestValidateAppEnv(t *testing.T) {
+	logger := logger.NewLogger(nil)
+
 	for _, envValue := range envValues {
 		t.Run(envValue, func(t *testing.T) {
 			env := &models.AppEnv{
 				ENV: envValue,
 			}
-
-			err := ValidateAppEnv(env)
+			err := ValidateAppEnv(logger, env)
 
 			if err != nil {
 				t.Fatalf("ValidateAppEnv() error = %v, want nil", err)
@@ -103,7 +105,7 @@ func TestValidateAppEnv(t *testing.T) {
 			ENV: "invalid",
 		}
 
-		err := ValidateAppEnv(env)
+		err := ValidateAppEnv(logger, env)
 
 		if err == nil {
 			t.Fatal("ValidateAppEnv() error = nil, want error")

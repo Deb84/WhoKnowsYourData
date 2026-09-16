@@ -7,20 +7,23 @@ import (
 )
 
 func main() {
-	logger := logger.NewLogger()
-	env, err := GetEnv(logger)
+	log := logger.NewLogger(nil)
+	env, err := GetEnv(log)
 	if err != nil {
-		logger.Error("%v", err)
+		log.Error("%v", err)
 		os.Exit(1)
 	}
 
+	// Error should not be raised here
+	_ = log.SetLevel(env.App.LOG_LEVEL)
+
 	if env.App.TRUSTED_CTX {
-		logger.Info("App launched in trusted context")
+		log.Info("App launched in trusted context")
 	}
 
-	err = app.ServerBootstrap(logger, *env)
+	err = app.ServerBootstrap(log, *env)
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 }
