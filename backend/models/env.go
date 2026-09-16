@@ -7,6 +7,10 @@ type Neo4jEnv struct {
 	PASSWORD string
 }
 
+type SqliteEnv struct {
+	PATH string
+}
+
 type AppEnv struct {
 	ENV         string
 	TRUSTED_CTX bool
@@ -17,7 +21,8 @@ type WebEnv struct {
 }
 
 type Env struct {
-	Neo4j Neo4jEnv
-	App   AppEnv
-	Web   WebEnv
+	Neo4j  Neo4jEnv
+	Sqlite SqliteEnv
+	App    AppEnv
+	Web    WebEnv
 }
