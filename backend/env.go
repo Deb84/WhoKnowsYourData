@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"whoknowsyourdata/domain"
@@ -16,11 +17,16 @@ import (
 const (
 	ENV = "ENV"
 
+	// Neo4j
 	NEO4J_HOST     = "NEO4J_HOST"
 	NEO4J_PORT     = "NEO4J_PORT"
 	NEO4J_USER     = "NEO4J_USER"
 	NEO4J_PASSWORD = "NEO4J_PASSWORD"
 
+	// Sqlite
+	APP_DB = "APP_DB"
+
+	// App
 	WEBUI_PORT = "WEBUI_PORT"
 )
 
@@ -62,6 +68,13 @@ func ValidateNeo4jEnv(env models.Neo4jEnv) error {
 	}
 	if env.PASSWORD == "" {
 		return emptyFieldErr(NEO4J_PASSWORD)
+	}
+	return nil
+}
+
+func ValidateSqliteEnv(env models.SqliteEnv) error {
+	if env.PATH == "" {
+		return emptyFieldErr(APP_DB)
 	}
 	return nil
 }
@@ -109,6 +122,10 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 		PASSWORD: os.Getenv(NEO4J_PASSWORD),
 	}
 
+	sqliteEnv := models.SqliteEnv{
+		PATH: filepath.Clean(os.Getenv(APP_DB)),
+	}
+
 	appEnv := models.AppEnv{
 		ENV: os.Getenv(ENV),
 	}
@@ -118,9 +135,10 @@ func GetEnv(log domain.Logger) (*models.Env, error) {
 	}
 
 	env := &models.Env{
-		Neo4j: neo4jEnv,
-		App:   appEnv,
-		Web:   webEnv,
+		Neo4j:  neo4jEnv,
+		Sqlite: sqliteEnv,
+		App:    appEnv,
+		Web:    webEnv,
 	}
 
 	if err := ValidateEnv(env); err != nil {
