@@ -92,5 +92,5 @@ func GetValueFromRecord(record *neo4j.Record) (*domain.Value, error) {
 		return nil, fmt.Errorf("node.label don't contains non-technical label")
 	}
 
-	return domain.NewValue(parsedUUID, sValue, sType, sSource, labelStr)
+	return domain.NewValue(parsedUUID, sValue, sSource, sType, labelStr)
 }
