@@ -8,7 +8,7 @@ import (
 )
 
 // Decode the JSON request body to a struct
-func (handler *Handler) decodeJSON(req *http.Request, toDecode any) error {
+func (handler *Handler) DecodeJSON(req *http.Request, toDecode any) error {
 	err := json.NewDecoder(req.Body).Decode(toDecode)
 	if err != nil {
 		return server.InvalidJSON(fmt.Errorf("unable to decode the json body: %w", err))
@@ -18,7 +18,7 @@ func (handler *Handler) decodeJSON(req *http.Request, toDecode any) error {
 }
 
 // Encode a struct into the request response
-func (handler *Handler) encodeJSON(w http.ResponseWriter, toEncode any) error {
+func (handler *Handler) EncodeJSON(w http.ResponseWriter, toEncode any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

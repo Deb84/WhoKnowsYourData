@@ -5,10 +5,11 @@ import (
 	"context"
 	"whoknowsyourdata/databases/neo4j"
 	"whoknowsyourdata/domain"
+	"whoknowsyourdata/handlers"
+	valueshandler "whoknowsyourdata/handlers/values"
 	"whoknowsyourdata/models"
 	neo4jrepo "whoknowsyourdata/repositories/values/neo4j"
 	"whoknowsyourdata/server"
-	"whoknowsyourdata/server/handlers"
 	valueservice "whoknowsyourdata/services/values"
 )
 
@@ -33,13 +34,14 @@ func ServerBootstrap(log domain.Logger, env models.Env) error {
 	}
 
 	handler := &handlers.Handler{Log: log}
-	valueHandler := handlers.NewValueHandler(handler, valueService)
+	valueHandler := valueshandler.NewValueHandler(handler, valueService)
 
 	router.Post(routes.APIValue(), valueHandler.CreateValue)
 	router.Post(routes.APIValues(), valueHandler.CreateValues)
 	router.Post(routes.APIRelation(), valueHandler.CreateRelation)
 	router.Post(routes.APIRelations(), valueHandler.CreateRelations)
 
+	router.Get(routes.APIValueUUID(), valueHandler.GetValue)
 	router.Get(routes.APIValuesLabel(), valueHandler.GetValuesFromLabel)
 	router.Delete(routes.APIValueUUID(), valueHandler.DeleteValue)
 
