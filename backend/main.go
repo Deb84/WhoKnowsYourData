@@ -18,5 +18,9 @@ func main() {
 		logger.Info("App launched in trusted context")
 	}
 
-	app.ServerBootstrap(logger, *env)
+	err = app.ServerBootstrap(logger, *env)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 }
