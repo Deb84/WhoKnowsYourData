@@ -2,8 +2,6 @@ package server
 
 import apperr "whoknowsyourdata/errors"
 
-type PublicData = apperr.PublicData
-
 type HTTPError struct {
 	Err        error
 	StatusCode int
@@ -25,13 +23,13 @@ func (e *HTTPError) Unwrap() error {
 }
 
 // Provide public error for internal errors
-var ErrDataInternal PublicData = PublicData{Code: "server_error", Message: "internal server error"}
+var ErrDataInternal = apperr.PublicData{Code: "server_error", Message: "internal server error"}
 
 func Internal(err error) *apperr.PublicError {
 	return apperr.Internal(ErrDataInternal, err)
 }
 
-var ErrDataInvalidJSON PublicData = PublicData{Code: "invalid_json", Message: "invalid json"}
+var ErrDataInvalidJSON = apperr.PublicData{Code: "invalid_json", Message: "invalid json"}
 
 func InvalidJSON(err error) *apperr.PublicError {
 	return apperr.Validation(ErrDataInvalidJSON, err)
